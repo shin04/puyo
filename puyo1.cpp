@@ -2,6 +2,8 @@
 //2019/04/12
 
 #include <curses.h>
+#include <random>
+#include <string>
 
 //ぷよの色を表すの列挙型
 //NONEが無し，RED,BLUE,..が色を表す
@@ -73,20 +75,36 @@ void SetValue(unsigned int y, unsigned int x, puyocolor value)
 	data[y*GetColumn() + x] = value;
 }
 
+//ぷよぷよの色を決定
+void DecidePuyoColor(puyocolor & puyo)
+{
+	std::random_device rand;
+	std::mt19937 mt(rand());
+	int color_num = mt()%4;
+	
+	if (color_num == 0) {
+		puyo = RED;
+	} else if (color_num == 1) {
+		puyo = BLUE;
+	} else if (color_num == 2) {
+		puyo = GREEN;
+	} else if (color_num == 3) {
+		puyo = YELLOW;
+	}
+}
 
 //盤面に新しいぷよ生成
 void GeneratePuyo()
 {
 	puyocolor newpuyo1;
-	newpuyo1 = RED;
-
 	puyocolor newpuyo2;
-	newpuyo2 = BLUE;
+	
+	DecidePuyoColor(newpuyo1);
+	DecidePuyoColor(newpuyo2);
 
 	SetValue(0, 5, newpuyo1);
 	SetValue(0, 6, newpuyo2);
 }
-
 //ぷよの着地判定．着地判定があるとtrueを返す
 bool LandingPuyo()
 {
@@ -259,18 +277,23 @@ void Display()
 			switch (GetValue(y, x))
 			{
 			case NONE:
+				attrset(0);
 				mvaddch(y, x, '.');
 				break;
 			case RED:
+				attrset(COLOR_PAIR(1));
 				mvaddch(y, x, 'R');
 				break;
 			case BLUE:
+				attrset(COLOR_PAIR(2));
 				mvaddch(y, x, 'B');
 				break;
 			case GREEN:
+				attrset(COLOR_PAIR(3));
 				mvaddch(y, x, 'G');
 				break;
 			case YELLOW:
+				attrset(COLOR_PAIR(4));
 				mvaddch(y, x, 'Y');
 				break;
 			default:
@@ -309,6 +332,10 @@ int main(int argc, char **argv){
 	initscr();
 	//カラー属性を扱うための初期化
 	start_color();
+	init_pair(1, COLOR_RED, COLOR_RED);
+	init_pair(2, COLOR_BLUE, COLOR_BLUE);
+	init_pair(3, COLOR_GREEN, COLOR_GREEN);
+	init_pair(4, COLOR_YELLOW, COLOR_YELLOW);
 
 	//キーを押しても画面に表示しない
 	noecho();
