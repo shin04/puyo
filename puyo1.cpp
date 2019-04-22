@@ -81,7 +81,7 @@ void DecidePuyoColor(puyocolor & puyo)
 	std::random_device rand;
 	std::mt19937 mt(rand());
 	int color_num = mt()%4;
-	
+
 	if (color_num == 0) {
 		puyo = RED;
 	} else if (color_num == 1) {
@@ -98,7 +98,7 @@ void GeneratePuyo()
 {
 	puyocolor newpuyo1;
 	puyocolor newpuyo2;
-	
+
 	DecidePuyoColor(newpuyo1);
 	DecidePuyoColor(newpuyo2);
 
@@ -300,7 +300,7 @@ void Display()
 				mvaddch(y, x, '?');
 				break;
 			}
-			
+
 		}
 	}
 
@@ -332,10 +332,10 @@ int main(int argc, char **argv){
 	initscr();
 	//カラー属性を扱うための初期化
 	start_color();
-	init_pair(1, COLOR_RED, COLOR_RED);
-	init_pair(2, COLOR_BLUE, COLOR_BLUE);
-	init_pair(3, COLOR_GREEN, COLOR_GREEN);
-	init_pair(4, COLOR_YELLOW, COLOR_YELLOW);
+	init_pair(1, COLOR_RED, COLOR_BLACK);
+	init_pair(2, COLOR_BLUE, COLOR_BLACK);
+	init_pair(3, COLOR_GREEN, COLOR_BLACK);
+	init_pair(4, COLOR_YELLOW, COLOR_BLACK);
 
 	//キーを押しても画面に表示しない
 	noecho();
@@ -394,7 +394,7 @@ int main(int argc, char **argv){
 		if (delay%waitCount == 0){
 			//ぷよ下に移動
 			MoveDown();
-			
+
 			//ぷよ着地判定
 			if (LandingPuyo())
 			{
