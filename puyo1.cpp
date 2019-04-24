@@ -3,7 +3,6 @@
 
 #include <curses.h>
 #include <random>
-#include <string>
 
 //ぷよの色を表すの列挙型
 //NONEが無し，RED,BLUE,..が色を表す
