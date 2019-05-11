@@ -314,6 +314,32 @@ public:
 	}
 };
 
+void DisplayPuyo(puyocolor puyo, int y, int x)
+{
+	switch (puyo)
+	{
+	case RED:
+		attrset(COLOR_PAIR(1));
+		mvaddch(y, x, 'R');
+		break;
+	case BLUE:
+		attrset(COLOR_PAIR(2));
+		mvaddch(y, x, 'B');
+		break;
+	case GREEN:
+		attrset(COLOR_PAIR(3));
+		mvaddch(y, x, 'G');
+		break;
+	case YELLOW:
+		attrset(COLOR_PAIR(4));
+		mvaddch(y, x, 'Y');
+		break;
+	default:
+		mvaddch(y, x, '?');
+		break;
+	}
+}
+
 //表示
 void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo)
 {
@@ -329,51 +355,9 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo)
 				attrset(0);
 				mvaddch(y, x, '.');
 			} else if (activeColor != NONE) {
-				switch (activeColor)
-				{
-				case RED:
-					attrset(COLOR_PAIR(1));
-					mvaddch(y, x, 'R');
-					break;
-				case BLUE:
-					attrset(COLOR_PAIR(2));
-					mvaddch(y, x, 'B');
-					break;
-				case GREEN:
-					attrset(COLOR_PAIR(3));
-					mvaddch(y, x, 'G');
-					break;
-				case YELLOW:
-					attrset(COLOR_PAIR(4));
-					mvaddch(y, x, 'Y');
-					break;
-				default:
-					mvaddch(y, x, '?');
-					break;
-				}
+				DisplayPuyo(activeColor, y, x);
 			} else if (stackedColor != NONE) {
-				switch (stackedColor)
-				{
-				case RED:
-					attrset(COLOR_PAIR(1));
-					mvaddch(y, x, 'R');
-					break;
-				case BLUE:
-					attrset(COLOR_PAIR(2));
-					mvaddch(y, x, 'B');
-					break;
-				case GREEN:
-					attrset(COLOR_PAIR(3));
-					mvaddch(y, x, 'G');
-					break;
-				case YELLOW:
-					attrset(COLOR_PAIR(4));
-					mvaddch(y, x, 'Y');
-					break;
-				default:
-					mvaddch(y, x, '?');
-					break;
-				}
+				DisplayPuyo(stackedColor, y, x);
 			}
 		}
 	}
