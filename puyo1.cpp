@@ -140,21 +140,25 @@ public:
 		{
 			for (int x = 0; x < activePuyo.GetColumn(); x++)
 			{
-				if (activePuyo.GetValue(y, x) != NONE)
+				puyocolor active = activePuyo.GetValue(y, x);
+				puyocolor preActive = activePuyo.GetValue(y, x - 1);
+				puyocolor nextActive = activePuyo.GetValue(y, x + 1);
+
+				if (active != NONE)
 				{
 					if (stackedPuyo.GetValue(y + 1, x) != NONE)
 					{
 						landed = true;
-						stackedPuyo.SetValue(y, x, activePuyo.GetValue(y, x));
+						stackedPuyo.SetValue(y, x, active);
 						activePuyo.SetValue(y, x, NONE);
-						if (activePuyo.GetValue(y, x-1) != NONE)
+						if (preActive != NONE)
 						{
-							stackedPuyo.SetValue(y, x-1, activePuyo.GetValue(y, x-1));
+							stackedPuyo.SetValue(y, x-1, preActive);
 							activePuyo.SetValue(y, x-1, NONE);
 						}
-						else if (activePuyo.GetValue(y, x+1) != NONE)
+						else if (nextActive != NONE)
 						{
-							stackedPuyo.SetValue(y, x+1, activePuyo.GetValue(y, x+1));
+							stackedPuyo.SetValue(y, x+1, nextActive);
 							activePuyo.SetValue(y, x+1, NONE);
 						}
 					}
@@ -162,7 +166,7 @@ public:
 					if (y == activePuyo.GetLine() - 1)
 					{
 						landed = true;
-						stackedPuyo.SetValue(y, x, activePuyo.GetValue(y, x));
+						stackedPuyo.SetValue(y, x, active);
 						activePuyo.SetValue(y, x, NONE);
 
 						//着地判定されたぷよを消す．本処理は必要に応じて変更する．
