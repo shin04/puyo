@@ -146,18 +146,22 @@ public:
 
 				if (active != NONE)
 				{
+					//ぷよがある
 					if (stackedPuyo.GetValue(y + 1, x) != NONE)
 					{
+						//一個下に着地済みのぷよがある
 						landed = true;
 						stackedPuyo.SetValue(y, x, active);
 						activePuyo.SetValue(y, x, NONE);
 						if (preActive != NONE)
 						{
+							//左隣にぷよがある時
 							stackedPuyo.SetValue(y, x-1, preActive);
 							activePuyo.SetValue(y, x-1, NONE);
 						}
 						else if (nextActive != NONE)
 						{
+							//右隣にぷよがある時
 							stackedPuyo.SetValue(y, x+1, nextActive);
 							activePuyo.SetValue(y, x+1, NONE);
 						}
@@ -168,9 +172,6 @@ public:
 						landed = true;
 						stackedPuyo.SetValue(y, x, active);
 						activePuyo.SetValue(y, x, NONE);
-
-						//着地判定されたぷよを消す．本処理は必要に応じて変更する．
-						//activePuyo.SetValue(y, x, NONE);
 					}
 				}
 			}
@@ -180,7 +181,7 @@ public:
 	}
 
 	//左移動
-	void MoveLeft(PuyoArrayActive &activePuyo)
+	void MoveLeft(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo)
 	{
 		//一時的格納場所メモリ確保
 		puyocolor *puyo_temp = new puyocolor[activePuyo.GetLine()*activePuyo.GetColumn()];
@@ -199,7 +200,8 @@ public:
 					continue;
 				}
 
-				if (0 < x && activePuyo.GetValue(y, x - 1) == NONE)
+				//端ではない、右隣に移動中、着地済みのぷよがない時に移動
+				if (0 < x && activePuyo.GetValue(y, x - 1) == NONE && stackedPuyo.GetValue(y, x - 1) == NONE)
 				{
 					puyo_temp[y*activePuyo.GetColumn() + (x - 1)] = activePuyo.GetValue(y, x);
 					//コピー後に元位置のpuyoactiveのデータは消す
@@ -226,7 +228,7 @@ public:
 	}
 
 	//右移動
-	void MoveRight(PuyoArrayActive &activePuyo)
+	void MoveRight(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo)
 	{
 		//一時的格納場所メモリ確保
 		puyocolor *puyo_temp = new puyocolor[activePuyo.GetLine()*activePuyo.GetColumn()];
@@ -245,7 +247,8 @@ public:
 					continue;
 				}
 
-				if (x < activePuyo.GetColumn() - 1 && activePuyo.GetValue(y, x + 1) == NONE)
+				//端ではない、右隣に移動中、着地済みのぷよがない時に移動
+				if (x < activePuyo.GetColumn() - 1 && activePuyo.GetValue(y, x + 1) == NONE && stackedPuyo.GetValue(y, x + 1) == NONE)
 				{
 					puyo_temp[y*activePuyo.GetColumn() + (x + 1)] = activePuyo.GetValue(y, x);
 					//コピー後に元位置のpuyoactiveのデータは消す
@@ -442,10 +445,10 @@ int main(int argc, char **argv){
 		switch (ch)
 		{
 		case KEY_LEFT:
-			control.MoveLeft(activePuyo);
+			control.MoveLeft(activePuyo, stackedPuyo);
 			break;
 		case KEY_RIGHT:
-			control.MoveRight(activePuyo);
+			control.MoveRight(activePuyo, stackedPuyo);
 			break;
 		case 'z':
 			//ぷよ回転処理
