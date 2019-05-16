@@ -1,8 +1,10 @@
 //課題1
 //2019/04/12
 
+#include <stdlib.h>
 #include <curses.h>
 #include <random>
+#include <iostream>
 
 //ぷよの色を表すの列挙型
 //NONEが無し，RED,BLUE,..が色を表す
@@ -131,10 +133,20 @@ public:
 		activePuyo.SetValue(0, 5, newpuyo1);
 		activePuyo.SetValue(0, 6, newpuyo2);
 	}
+
 	//ぷよの着地判定．着地判定があるとtrueを返す
 	bool LandingPuyo(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo)
 	{
 		bool landed = false;
+
+		//これ以上積めない時はゲームオーバー
+		if (stackedPuyo.GetValue(1, 5) != NONE || stackedPuyo.GetValue(1, 6) != NONE)
+		{
+			//上までぷよが積まれていたらゲーム終了
+			endwin();
+			std::cout << "GAME OVER" << std::endl;
+			exit(0);
+		}
 
 		for (int y = 0; y < activePuyo.GetLine(); y++)
 		{
