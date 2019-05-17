@@ -287,7 +287,7 @@ public:
 	}
 
 	//下移動
-	void MoveDown(PuyoArray &activePuyo)
+	void MoveDown(PuyoArray &activePuyo, PuyoArrayStack &stackedPuyo)
 	{
 		//一時的格納場所メモリ確保
 		puyocolor *puyo_temp = new puyocolor[activePuyo.GetLine()*activePuyo.GetColumn()];
@@ -306,7 +306,7 @@ public:
 					continue;
 				}
 
-				if (y < activePuyo.GetLine() - 1 && activePuyo.GetValue(y + 1, x) == NONE)
+				if (y < activePuyo.GetLine() - 1 && activePuyo.GetValue(y + 1, x) == NONE && stackedPuyo.GetValue(y + 1, x) == NONE)
 				{
 					puyo_temp[(y + 1)*activePuyo.GetColumn() + x] = activePuyo.GetValue(y, x);
 					//コピー後に元位置のpuyoactiveのデータは消す
@@ -462,6 +462,8 @@ int main(int argc, char **argv){
 		case KEY_RIGHT:
 			control.MoveRight(activePuyo, stackedPuyo);
 			break;
+		case KEY_DOWN:
+			control.MoveDown(activePuyo, stackedPuyo);
 		case 'z':
 			//ぷよ回転処理
 			break;
@@ -473,7 +475,7 @@ int main(int argc, char **argv){
 		//処理速度調整のためのif文
 		if (delay%waitCount == 0){
 			//ぷよ下に移動
-			control.MoveDown(activePuyo);
+			control.MoveDown(activePuyo, stackedPuyo);
 
 			//ぷよ着地判定
 			if (control.LandingPuyo(activePuyo, stackedPuyo))
