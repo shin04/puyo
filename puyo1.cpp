@@ -94,7 +94,30 @@ public:
 
 class PuyoArrayActive : public PuyoArray
 {
-	
+private:
+	int rotatepuyo;
+
+public:
+	PuyoArrayActive()
+	{
+		rotatepuyo = 0;
+	}
+
+	int GetRotatePuyo()
+	{
+		return rotatepuyo;
+	}
+
+	void SetRotatePuyo(int rotate)
+	{
+		if (0 > rotate || rotate > 3)
+		{
+			//引数がおかしい
+			return;
+		}
+
+		rotatepuyo = rotate;
+	}
 };
 
 class PuyoArrayStack : public PuyoArray
@@ -134,6 +157,7 @@ public:
 
 		activePuyo.SetValue(0, 5, newpuyo1);
 		activePuyo.SetValue(0, 6, newpuyo2);
+		activePuyo.SetRotatePuyo(0);
 	}
 
 	//ぷよの着地判定．着地判定があるとtrueを返す
@@ -356,6 +380,76 @@ public:
 
 		//一時的格納場所メモリ解放
 		delete[] puyo_temp;
+	}
+
+	void Rotate(PuyoArrayActive &activePuyo)
+	{
+		puyocolor puyocolor1;
+		puyocolor puyocolor2;
+		unsigned int x1 = 0;
+		unsigned int x2 = 0;
+		unsigned int y1 = 0;
+		unsigned int y2 = 0;
+
+		bool findingpuyo1 = true;
+		for (int y = 0; y < activePuyo.GetLine(); y++)
+		{
+			for (int x = 0; x < activePuyo.GetColumn(); x++)
+			{
+				if (activePuyo.GetValue(y, x) != NONE)
+				{
+					if (findingpuyo1 == true)
+					{
+						puyocolor1 = activePuyo.GetValue(y, x);
+						x1 = x;
+						y1 = y;
+						findingpuyo1 = false;
+					}
+					else if (findingpuyo1 != true)
+					{
+						puyocolor2 = activePuyo.GetValue(y, x);
+						x2 = x;
+						y2 = y;
+					}
+				}
+			}
+		}
+
+		activePuyo.SetValue(y1, x1, NONE);
+		activePuyo.SetValue(y2, x2, NONE);
+
+		switch (activePuyo.GetRotatePuyo()) {
+			case 0:
+				/* AB -> A
+				         B*/
+				activePuyo.SetValue(y1, x1, puyocolor1);
+				activePuyo.SetValue(y2 + 1, x2 - 1, puyocolor2);
+				activePuyo.SetRotatePuyo(1);
+				break;
+			case 1:
+				/* A -> BA
+				   B     */
+				activePuyo.SetValue(y1, x1, puyocolor1);
+				activePuyo.SetValue(y2 - 1, x2 - 1, puyocolor2);
+				activePuyo.SetRotatePuyo(2);
+				break;
+			case 2:
+				/*    -> A
+				   AB    B*/
+				activePuyo.SetValue(y1 - 1, x1 + 1, puyocolor1);
+				activePuyo.SetValue(y2, x2, puyocolor2);
+				activePuyo.SetRotatePuyo(3);
+				break;
+			case 3:
+				/* A -> AB
+				   B*/
+				activePuyo.SetValue(y1 + 1, x1 + 1, puyocolor1);
+				activePuyo.SetValue(y2, x2, puyocolor2);
+				activePuyo.SetRotatePuyo(0);
+				break;
+			default:
+				break;
+		}
 	}
 
 	//ぷよ消滅処理を全座標で行う
@@ -630,8 +724,9 @@ int main(int argc, char **argv){
 			break;
 		case KEY_DOWN:
 			control.MoveDown(activePuyo, stackedPuyo);
-		case 'z':
-			//ぷよ回転処理
+			break;
+		case KEY_UP:
+			control.Rotate(activePuyo);
 			break;
 		default:
 			break;
