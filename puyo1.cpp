@@ -10,6 +10,8 @@
 //NONEが無し，RED,BLUE,..が色を表す
 enum puyocolor { NONE, RED, BLUE, GREEN, YELLOW };
 
+void DisplayPuyo(puyocolor puyo, int y, int x);
+
 class PuyoArray
 {
 private:
@@ -92,7 +94,7 @@ public:
 
 class PuyoArrayActive : public PuyoArray
 {
-
+	
 };
 
 class PuyoArrayStack : public PuyoArray
@@ -190,6 +192,30 @@ public:
 		}
 
 		return landed;
+	}
+
+	void TearOffPuyo(PuyoArrayStack &stackedPuyo)
+	{
+		for (int y = 0; y < stackedPuyo.GetLine(); y++)
+		{
+			for (int x = 0; x < stackedPuyo.GetColumn(); x++)
+			{
+				puyocolor stackedColor = stackedPuyo.GetValue(y, x);
+				if (stackedColor != NONE && stackedPuyo.GetValue(y + 1, x) == NONE)
+				{
+					stackedPuyo.SetValue(y, x, NONE);
+					while (true)
+					{
+						if (y == stackedPuyo.GetLine() - 1 || stackedPuyo.GetValue(y + 1, x) != NONE)
+						{
+							stackedPuyo.SetValue(y, x, stackedColor);
+							break;
+						}
+						y++;
+					}
+				}
+			}
+		}
 	}
 
 	//左移動
@@ -621,8 +647,12 @@ int main(int argc, char **argv){
 			if (control.LandingPuyo(activePuyo, stackedPuyo))
 			{
 				//着地していたら消えるぷよを探して新しいぷよ生成
-				control.VanishPuyo(stackedPuyo);
-
+				int a = 1;
+				while (a > 0) {
+					control.TearOffPuyo(stackedPuyo);
+					a = control.VanishPuyo(stackedPuyo);
+					control.TearOffPuyo(stackedPuyo);
+				}
 				control.GeneratePuyo(activePuyo);
 			}
 		}
