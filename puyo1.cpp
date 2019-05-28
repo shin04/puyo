@@ -181,6 +181,8 @@ public:
 				puyocolor active = activePuyo.GetValue(y, x);
 				puyocolor preActive = activePuyo.GetValue(y, x - 1);
 				puyocolor nextActive = activePuyo.GetValue(y, x + 1);
+				puyocolor aboveActive = activePuyo.GetValue(y - 1, x);
+				puyocolor underActive = activePuyo.GetValue(y + 1, x);
 
 				if (active != NONE)
 				{
@@ -202,6 +204,16 @@ public:
 							//右隣にぷよがある時
 							stackedPuyo.SetValue(y, x+1, nextActive);
 							activePuyo.SetValue(y, x+1, NONE);
+						}
+						else if (aboveActive != NONE)
+						{
+							stackedPuyo.SetValue(y - 1, x, aboveActive);
+							activePuyo.SetValue(y - 1, x, NONE);
+						}
+						else if (underActive != NONE)
+						{
+							stackedPuyo.SetValue(y + 1, x, underActive);
+							activePuyo.SetValue(y + 1, x, NONE);
 						}
 					}
 
@@ -382,8 +394,9 @@ public:
 		delete[] puyo_temp;
 	}
 
-	void Rotate(PuyoArrayActive &activePuyo)
+	void Rotate(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo)
 	{
+		// 盤面の左上から順に activepuyo を探して先のものを１、後のものを２とする
 		puyocolor puyocolor1;
 		puyocolor puyocolor2;
 		unsigned int x1 = 0;
@@ -391,6 +404,7 @@ public:
 		unsigned int y1 = 0;
 		unsigned int y2 = 0;
 
+		// ぷよを探索
 		bool findingpuyo1 = true;
 		for (int y = 0; y < activePuyo.GetLine(); y++)
 		{
@@ -415,38 +429,108 @@ public:
 			}
 		}
 
+		// 開店前にぷよを消す
 		activePuyo.SetValue(y1, x1, NONE);
 		activePuyo.SetValue(y2, x2, NONE);
 
+		// ぷよの回転
 		switch (activePuyo.GetRotatePuyo()) {
 			case 0:
+				// 開店後に番外に出るときは回転しない
+				if (x2 <= 0 || y2 >= activePuyo.GetLine() - 1)
+				{
+					activePuyo.SetValue(y1, x1, puyocolor1);
+					activePuyo.SetValue(y2, x2, puyocolor2);
+					break;
+				}
+
+				// 回転後に着地済みのぷよと重なるときは回転しない
+				if (stackedPuyo.GetValue(y2 + 1, x2 - 1) != NONE)
+				{
+					activePuyo.SetValue(y1, x1, puyocolor1);
+					activePuyo.SetValue(y2, x2, puyocolor2);
+					break;
+				}
+
 				/* AB -> A
-				         B*/
+				         B */
 				activePuyo.SetValue(y1, x1, puyocolor1);
 				activePuyo.SetValue(y2 + 1, x2 - 1, puyocolor2);
 				activePuyo.SetRotatePuyo(1);
 				break;
+
 			case 1:
+				// 開店後に番外に出るときは回転しない
+				if (x2 <= 0 || y2 <= 0)
+				{
+					activePuyo.SetValue(y1, x1, puyocolor1);
+					activePuyo.SetValue(y2, x2, puyocolor2);
+					break;
+				}
+
+				// 回転後に着地済みプヨと重なるときは回転しない
+				if (stackedPuyo.GetValue(y2 - 1, x2 - 1) != NONE)
+				{
+					activePuyo.SetValue(y1, x1, puyocolor1);
+					activePuyo.SetValue(y2, x2, puyocolor2);
+					break;
+				}
+
 				/* A -> BA
-				   B     */
+				   B       */
 				activePuyo.SetValue(y1, x1, puyocolor1);
 				activePuyo.SetValue(y2 - 1, x2 - 1, puyocolor2);
 				activePuyo.SetRotatePuyo(2);
 				break;
+
 			case 2:
+				// 開店後に番外に出るときは回転しない
+				if (x1 >= activePuyo.GetColumn() - 1 || y1 <= 0)
+				{
+					activePuyo.SetValue(y1, x1, puyocolor1);
+					activePuyo.SetValue(y2, x2, puyocolor2);
+					break;
+				}
+
+				// 回転後に着地済みプヨと重なるときは回転しない
+				if (stackedPuyo.GetValue(y1 - 1, x1 + 1) != NONE)
+				{
+					activePuyo.SetValue(y1, x1, puyocolor1);
+					activePuyo.SetValue(y2, x2, puyocolor2);
+					break;
+				}
+
 				/*    -> A
-				   AB    B*/
+				   AB    B */
 				activePuyo.SetValue(y1 - 1, x1 + 1, puyocolor1);
 				activePuyo.SetValue(y2, x2, puyocolor2);
 				activePuyo.SetRotatePuyo(3);
 				break;
+
 			case 3:
+				// 開店後に番外に出るときは回転しない
+				if (x1 >= activePuyo.GetColumn() - 1 || y1 >= activePuyo.GetLine() - 1)
+				{
+					activePuyo.SetValue(y1, x1, puyocolor1);
+					activePuyo.SetValue(y2, x2, puyocolor2);
+					break;
+				}
+
+				// 回転した後に着地済みプヨと重なるときは回転しない
+				if (stackedPuyo.GetValue(y1 + 1, x1 + 1) != NONE)
+				{
+					activePuyo.SetValue(y1, x1, puyocolor1);
+					activePuyo.SetValue(y2, x2, puyocolor2);
+					break;
+				}
+
 				/* A -> AB
-				   B*/
+				   B       */
 				activePuyo.SetValue(y1 + 1, x1 + 1, puyocolor1);
 				activePuyo.SetValue(y2, x2, puyocolor2);
 				activePuyo.SetRotatePuyo(0);
 				break;
+
 			default:
 				break;
 		}
@@ -726,7 +810,7 @@ int main(int argc, char **argv){
 			control.MoveDown(activePuyo, stackedPuyo);
 			break;
 		case KEY_UP:
-			control.Rotate(activePuyo);
+			control.Rotate(activePuyo, stackedPuyo);
 			break;
 		default:
 			break;
