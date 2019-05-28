@@ -5,6 +5,7 @@
 #include <curses.h>
 #include <random>
 #include <iostream>
+#include <unistd.h>
 
 //ぷよの色を表すの列挙型
 //NONEが無し，RED,BLUE,..が色を表す
@@ -95,7 +96,7 @@ public:
 class PuyoArrayActive : public PuyoArray
 {
 private:
-	int rotatepuyo;
+	int rotatepuyo; // ぷよの回転状態
 
 public:
 	PuyoArrayActive()
@@ -105,11 +106,13 @@ public:
 
 	int GetRotatePuyo()
 	{
+		// ゲッター
 		return rotatepuyo;
 	}
 
 	void SetRotatePuyo(int rotate)
 	{
+		// セッター
 		if (0 > rotate || rotate > 3)
 		{
 			//引数がおかしい
