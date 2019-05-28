@@ -207,16 +207,19 @@ public:
 						}
 						else if (aboveActive != NONE)
 						{
+							//真上にぷよがある
 							stackedPuyo.SetValue(y - 1, x, aboveActive);
 							activePuyo.SetValue(y - 1, x, NONE);
 						}
 						else if (underActive != NONE)
 						{
+							//真下にぷよがある
 							stackedPuyo.SetValue(y + 1, x, underActive);
 							activePuyo.SetValue(y + 1, x, NONE);
 						}
 					}
 
+					//版の一番下に到達
 					if (y == activePuyo.GetLine() - 1)
 					{
 						landed = true;
@@ -237,6 +240,8 @@ public:
 			for (int x = 0; x < stackedPuyo.GetColumn(); x++)
 			{
 				puyocolor stackedColor = stackedPuyo.GetValue(y, x);
+
+				// 着地済みぷよがあり、その下に何もない時、そのぷよを着地するまで落とす
 				if (stackedColor != NONE && stackedPuyo.GetValue(y + 1, x) == NONE)
 				{
 					stackedPuyo.SetValue(y, x, NONE);
@@ -394,6 +399,7 @@ public:
 		delete[] puyo_temp;
 	}
 
+	// 回転
 	void Rotate(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo)
 	{
 		// 盤面の左上から順に activepuyo を探して先のものを１、後のものを２とする
@@ -826,10 +832,8 @@ int main(int argc, char **argv){
 			if (control.LandingPuyo(activePuyo, stackedPuyo))
 			{
 				//着地していたら消えるぷよを探して新しいぷよ生成
-				int a = 1;
-				while (a > 0) {
-					control.TearOffPuyo(stackedPuyo);
-					a = control.VanishPuyo(stackedPuyo);
+				control.TearOffPuyo(stackedPuyo);
+				while (control.VanishPuyo(stackedPuyo) > 0) {
 					control.TearOffPuyo(stackedPuyo);
 				}
 				control.GeneratePuyo(activePuyo);
