@@ -837,6 +837,8 @@ int main(int argc, char **argv){
 				//着地していたら消えるぷよを探して新しいぷよ生成
 				control.TearOffPuyo(stackedPuyo);
 				while (control.VanishPuyo(stackedPuyo) > 0) {
+					Display(activePuyo, stackedPuyo);
+					usleep(1000000);
 					control.TearOffPuyo(stackedPuyo);
 				}
 				control.GeneratePuyo(activePuyo);
