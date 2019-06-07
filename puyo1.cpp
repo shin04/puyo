@@ -13,6 +13,7 @@
 enum puyocolor { NONE, RED, BLUE, GREEN, YELLOW };
 
 void DisplayPuyo(puyocolor puyo, int y, int x);
+void DisplayEndScreen();
 
 class PuyoArray
 {
@@ -180,8 +181,9 @@ public:
 		{
 			//上までぷよが積まれていたらゲーム終了
 			endwin();
-			std::cout << "GAME OVER" << std::endl;
-			exit(0);
+			DisplayEndScreen();
+			//std::cout << "GAME OVER" << std::endl;
+			//exit(0);
 		}
 
 		for (int y = 0; y < activePuyo.GetLine(); y++)
@@ -746,19 +748,6 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoN
 		}
 	}
 
-	//情報表示
-	// int count = 0;
-	// for (int y = 0; y < activePuyo.GetLine(); y++)
-	// {
-	// 	for (int x = 0; x < activePuyo.GetColumn(); x++)
-	// 	{
-	// 		if (activePuyo.GetValue(y, x) != NONE)
-	// 		{
-	// 			count++;
-	// 		}
-	// 	}
-	// }
-
 	char msg1[256];
 	char msg2[256];
 	char msg3[4];
@@ -774,6 +763,32 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoN
 	refresh();
 }
 
+void DisplayStartScreen()
+{
+	clear();
+	mvprintw(LINES/2-4, (COLS-72)/2, "SSSSSSSS   TTTTTTTT     AAAAAA     RRRRRR     TTTTTTTT");
+	mvprintw(LINES/2-3, (COLS-72)/2, "S      S      TT       A      A    R     R       TT   ");
+	mvprintw(LINES/2-2, (COLS-72)/2, "S             TT       A      A    R      R      TT   ");
+	mvprintw(LINES/2-1, (COLS-72)/2, "SSSSSSSS      TT       AAAAAAAA    RRRRRRR       TT   ");
+	mvprintw(LINES/2  , (COLS-72)/2, "       S      TT       A      A    R RR          TT   ");
+	mvprintw(LINES/2+1, (COLS-72)/2, "S      S      TT       A      A    R   R         TT   ");
+	mvprintw(LINES/2+2, (COLS-72)/2, "S      S      TT       A      A    R    R        TT   ");
+	mvprintw(LINES/2+3, (COLS-72)/2, "SSSSSSSS      TT       A      A    R     RR      TT   ");
+	mvprintw(LINES/2+6, (COLS-72)/2, "Plese Push SpaceKey");
+}
+
+void DisplayEndScreen()
+{
+	mvprintw(LINES/2-4,(COLS-70)/2," GGGG    AAA   M     M  EEEEE        OOOO   V     V  EEEEE  RRRR       ");
+  mvprintw(LINES/2-3,(COLS-70)/2,"G    G  A   A  MM   MM  E           O    O  V     V  E      R   R      ");
+  mvprintw(LINES/2-2,(COLS-70)/2,"G       A   A  M M M M  E           O    O  V     V  E      R    R     ");
+  mvprintw(LINES/2-1,(COLS-70)/2,"G       AAAAA  M  M  M  EEEEE       O    O  V     V  EEEEE  RRRRR      ");
+  mvprintw(LINES/2  ,(COLS-70)/2,"G       A   A  M     M  E           O    O  V     V  E      R  R       ");
+  mvprintw(LINES/2+1,(COLS-70)/2,"G   GGG A   A  M     M  E           O    O   V   V   E      R   R      ");
+  mvprintw(LINES/2+2,(COLS-70)/2,"G    G  A   A  M     M  E           O    O    V V    E      R    R     ");
+  mvprintw(LINES/2+3,(COLS-70)/2," GGGG   A   A  M     M  EEEEE        OOOO      V     EEEEE  R     R    ");
+	mvprintw(LINES/2+6, (COLS-72)/2, "Plese Push 'Q'key");
+}
 
 //ここから実行される
 int main(int argc, char **argv){
@@ -786,6 +801,7 @@ int main(int argc, char **argv){
 
 	//画面の初期化
 	initscr();
+
 	//カラー属性を扱うための初期化
 	start_color();
 	init_pair(1, COLOR_RED, COLOR_BLACK);
@@ -822,6 +838,22 @@ int main(int argc, char **argv){
 
 	int puyostate = 0; //ぷよの回転状況
 	int score = 0; //点数
+
+	// スタート画面
+	while (1) {
+		//キー入力受付
+		int ch;
+		ch = getch();
+
+		//スペースキー入力でゲーム開始
+		if (ch == ' ')
+		{
+			clear();
+			break;
+		}
+
+		DisplayStartScreen();
+	}
 
 	//メイン処理ループ
 	while (1)
