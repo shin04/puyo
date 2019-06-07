@@ -176,16 +176,6 @@ public:
 	{
 		bool landed = false;
 
-		//これ以上積めない時はゲームオーバー
-		if (stackedPuyo.GetValue(1, 5) != NONE || stackedPuyo.GetValue(1, 6) != NONE)
-		{
-			//上までぷよが積まれていたらゲーム終了
-			endwin();
-			DisplayEndScreen();
-			//std::cout << "GAME OVER" << std::endl;
-			//exit(0);
-		}
-
 		for (int y = 0; y < activePuyo.GetLine(); y++)
 		{
 			for (int x = 0; x < activePuyo.GetColumn(); x++)
@@ -766,19 +756,20 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoN
 void DisplayStartScreen()
 {
 	clear();
-	mvprintw(LINES/2-4, (COLS-72)/2, "SSSSSSSS   TTTTTTTT     AAAAAA     RRRRRR     TTTTTTTT");
-	mvprintw(LINES/2-3, (COLS-72)/2, "S      S      TT       A      A    R     R       TT   ");
-	mvprintw(LINES/2-2, (COLS-72)/2, "S             TT       A      A    R      R      TT   ");
-	mvprintw(LINES/2-1, (COLS-72)/2, "SSSSSSSS      TT       AAAAAAAA    RRRRRRR       TT   ");
-	mvprintw(LINES/2  , (COLS-72)/2, "       S      TT       A      A    R RR          TT   ");
-	mvprintw(LINES/2+1, (COLS-72)/2, "S      S      TT       A      A    R   R         TT   ");
-	mvprintw(LINES/2+2, (COLS-72)/2, "S      S      TT       A      A    R    R        TT   ");
-	mvprintw(LINES/2+3, (COLS-72)/2, "SSSSSSSS      TT       A      A    R     RR      TT   ");
+	mvprintw(LINES/2-4, (COLS-72)/2, " SSSSSS    TTTTTTTTTTT    AAAAAA     RRRRRR     TTTTTTTTTT");
+	mvprintw(LINES/2-3, (COLS-72)/2, "S      S       TT        A      A    R     R        TT    ");
+	mvprintw(LINES/2-2, (COLS-72)/2, "S              TT        A      A    R      R       TT    ");
+	mvprintw(LINES/2-1, (COLS-72)/2, " SSSSSS        TT        AAAAAAAA    RRRRRRR        TT    ");
+	mvprintw(LINES/2  , (COLS-72)/2, "       S       TT        A      A    R RR           TT    ");
+	mvprintw(LINES/2+1, (COLS-72)/2, "S      S       TT        A      A    R   R          TT    ");
+	mvprintw(LINES/2+2, (COLS-72)/2, "S      S       TT        A      A    R    R         TT    ");
+	mvprintw(LINES/2+3, (COLS-72)/2, " SSSSSS        TT        A      A    R     RR       TT    ");
 	mvprintw(LINES/2+6, (COLS-72)/2, "Plese Push SpaceKey");
 }
 
 void DisplayEndScreen()
 {
+	clear();
 	mvprintw(LINES/2-4,(COLS-70)/2," GGGG    AAA   M     M  EEEEE        OOOO   V     V  EEEEE  RRRR       ");
   mvprintw(LINES/2-3,(COLS-70)/2,"G    G  A   A  MM   MM  E           O    O  V     V  E      R   R      ");
   mvprintw(LINES/2-2,(COLS-70)/2,"G       A   A  M M M M  E           O    O  V     V  E      R    R     ");
@@ -895,6 +886,16 @@ int main(int argc, char **argv){
 			//ぷよ着地判定
 			if (control.LandingPuyo(activePuyo, stackedPuyo))
 			{
+				//これ以上積めない時はゲームオーバー
+				if (stackedPuyo.GetValue(1, 5) != NONE || stackedPuyo.GetValue(1, 6) != NONE)
+				{
+					//上までぷよが積まれていたらゲーム終了
+					//endwin();
+					//std::cout << "GAME OVER" << std::endl;
+					//exit(0);
+					break;
+				}
+
 				//着地していたら消えるぷよを探して新しいぷよ生成
 				control.TearOffPuyo(stackedPuyo);
 				int rensaCount = 0;
@@ -916,6 +917,21 @@ int main(int argc, char **argv){
 		Display(activePuyo, stackedPuyo, puyoNumber, score, nextpuyo1, nextpuyo2);
 	}
 
+	// ゲームオーバー画面
+	while (1) {
+		//キー入力受付
+		int ch;
+		ch = getch();
+
+		//Qキー入力でゲーム開始
+		if (ch == 'Q')
+		{
+			clear();
+			break;
+		}
+
+		DisplayEndScreen();
+	}
 
 	//画面をリセット
 	endwin();
