@@ -6,6 +6,7 @@
 #include <random>
 #include <iostream>
 #include <unistd.h>
+#include <math.h>
 
 //ぷよの色を表すの列挙型
 //NONEが無し，RED,BLUE,..が色を表す
@@ -149,14 +150,20 @@ public:
 		}
 	}
 
-	//盤面に新しいぷよ生成
-	void GeneratePuyo(PuyoArrayActive &activePuyo)
+	//新しいぷよ生成
+	puyocolor GeneratePuyo(PuyoArrayActive &activePuyo)
 	{
-		puyocolor newpuyo1;
-		puyocolor newpuyo2;
+		puyocolor newpuyo;
 
-		DecidePuyoColor(newpuyo1);
-		DecidePuyoColor(newpuyo2);
+		DecidePuyoColor(newpuyo);
+
+		return newpuyo;
+	}
+
+	// 新しいぷよを画面にセット
+	void SettingNewPuyo(PuyoArrayActive &activePuyo, puyocolor newpuyo1, puyocolor newpuyo2, int &puyoNumber)
+	{
+		puyoNumber++; //ぷよの数をカウント
 
 		activePuyo.SetValue(0, 5, newpuyo1);
 		activePuyo.SetValue(0, 6, newpuyo2);
@@ -686,6 +693,11 @@ public:
 	}
 };
 
+int calculationScore(int vanishedCount, int rensaCount)
+{
+	return vanishedCount*pow(2, rensaCount)*10;
+}
+
 void DisplayPuyo(puyocolor puyo, int y, int x)
 {
 	switch (puyo)
@@ -713,7 +725,7 @@ void DisplayPuyo(puyocolor puyo, int y, int x)
 }
 
 //表示
-void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo)
+void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoNumber, int score, puyocolor newpuyo1, puyocolor newpuyo2)
 {
 	//落下中ぷよ表示
 	for (int y = 0; y < activePuyo.GetLine(); y++)
@@ -735,21 +747,29 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo)
 	}
 
 	//情報表示
-	int count = 0;
-	for (int y = 0; y < activePuyo.GetLine(); y++)
-	{
-		for (int x = 0; x < activePuyo.GetColumn(); x++)
-		{
-			if (activePuyo.GetValue(y, x) != NONE)
-			{
-				count++;
-			}
-		}
-	}
+	// int count = 0;
+	// for (int y = 0; y < activePuyo.GetLine(); y++)
+	// {
+	// 	for (int x = 0; x < activePuyo.GetColumn(); x++)
+	// 	{
+	// 		if (activePuyo.GetValue(y, x) != NONE)
+	// 		{
+	// 			count++;
+	// 		}
+	// 	}
+	// }
 
-	char msg[256];
-	sprintf(msg, "Field: %d x %d, Puyo number: %03d", activePuyo.GetLine(), activePuyo.GetColumn(), count);
-	mvaddstr(2, COLS - 35, msg);
+	char msg1[256];
+	char msg2[256];
+	char msg3[4];
+	sprintf(msg1, "Field: %d x %d, Puyo number: %d\n", activePuyo.GetLine(), activePuyo.GetColumn(), puyoNumber);
+	mvaddstr(2, COLS - 35, msg1);
+	sprintf(msg2, "Score : %d\n", score);
+	mvaddstr(3, COLS - 35, msg2);
+	sprintf(msg3, "NEXT");
+	mvaddstr(5, COLS - 35, msg3);
+	DisplayPuyo(newpuyo1, 7, COLS - 30);
+	DisplayPuyo(newpuyo2, 7, COLS - 29);
 
 	refresh();
 }
@@ -761,6 +781,8 @@ int main(int argc, char **argv){
 	PuyoArrayActive activePuyo;
 	PuyoArrayStack stackedPuyo;
 	PuyoControl control;
+
+	int puyoNumber = 0; //ぷよの数をカウント
 
 	//画面の初期化
 	initscr();
@@ -786,12 +808,20 @@ int main(int argc, char **argv){
 	//初期化処理
 	activePuyo.ChangeSize(LINES/2, COLS/2);	//フィールドは画面サイズの縦横1/2にする
 	stackedPuyo.ChangeSize(LINES/2, COLS/2);
-	control.GeneratePuyo(activePuyo);	//最初のぷよ生成
+	//最初のぷよ生成
+	puyocolor firstpuyo1 = control.GeneratePuyo(activePuyo);
+	puyocolor firstpuyo2 = control.GeneratePuyo(activePuyo);
+	control.SettingNewPuyo(activePuyo, firstpuyo1, firstpuyo2, puyoNumber);
+
+	// 次のぷよを入れとく変数
+	puyocolor nextpuyo1 = control.GeneratePuyo(activePuyo);
+	puyocolor nextpuyo2 = control.GeneratePuyo(activePuyo);
 
 	int delay = 0;
 	int waitCount = 20000;
 
-	int puyostate = 0;
+	int puyostate = 0; //ぷよの回転状況
+	int score = 0; //点数
 
 	//メイン処理ループ
 	while (1)
@@ -825,7 +855,6 @@ int main(int argc, char **argv){
 			break;
 		}
 
-
 		//処理速度調整のためのif文
 		if (delay%waitCount == 0){
 			//ぷよ下に移動
@@ -836,18 +865,23 @@ int main(int argc, char **argv){
 			{
 				//着地していたら消えるぷよを探して新しいぷよ生成
 				control.TearOffPuyo(stackedPuyo);
-				while (control.VanishPuyo(stackedPuyo) > 0) {
-					Display(activePuyo, stackedPuyo);
+				int rensaCount = 0;
+				while (int vanishedCount = control.VanishPuyo(stackedPuyo) > 0) {
+					rensaCount += 1;
+					score += calculationScore(vanishedCount, rensaCount);
+					Display(activePuyo, stackedPuyo, puyoNumber, score, nextpuyo1, nextpuyo2);
 					usleep(1000000);
 					control.TearOffPuyo(stackedPuyo);
 				}
-				control.GeneratePuyo(activePuyo);
+				control.SettingNewPuyo(activePuyo, nextpuyo1, nextpuyo2, puyoNumber);
+				nextpuyo1 = control.GeneratePuyo(activePuyo);
+				nextpuyo2 = control.GeneratePuyo(activePuyo);
 			}
 		}
 		delay++;
 
 		//表示
-		Display(activePuyo, stackedPuyo);
+		Display(activePuyo, stackedPuyo, puyoNumber, score, nextpuyo1, nextpuyo2);
 	}
 
 
