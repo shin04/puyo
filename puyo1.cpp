@@ -195,6 +195,7 @@ public:
 						landed = true;
 						stackedPuyo.SetValue(y, x, active);
 						activePuyo.SetValue(y, x, NONE);
+
 						if (preActive != NONE)
 						{
 							//左隣にぷよがある時
@@ -227,6 +228,31 @@ public:
 						landed = true;
 						stackedPuyo.SetValue(y, x, active);
 						activePuyo.SetValue(y, x, NONE);
+
+						if (preActive != NONE)
+						{
+							//左隣にぷよがある時
+							stackedPuyo.SetValue(y, x-1, preActive);
+							activePuyo.SetValue(y, x-1, NONE);
+						}
+						else if (nextActive != NONE)
+						{
+							//右隣にぷよがある時
+							stackedPuyo.SetValue(y, x+1, nextActive);
+							activePuyo.SetValue(y, x+1, NONE);
+						}
+						else if (aboveActive != NONE)
+						{
+							//真上にぷよがある
+							stackedPuyo.SetValue(y - 1, x, aboveActive);
+							activePuyo.SetValue(y - 1, x, NONE);
+						}
+						else if (underActive != NONE)
+						{
+							//真下にぷよがある
+							stackedPuyo.SetValue(y + 1, x, underActive);
+							activePuyo.SetValue(y + 1, x, NONE);
+						}
 					}
 				}
 			}
@@ -927,7 +953,6 @@ int main(int argc, char **argv){
 			//ぷよ下に移動
 			control.MoveDown(activePuyo, stackedPuyo);
 
-			//ぷよ着地判定
 			if (control.LandingPuyo(activePuyo, stackedPuyo))
 			{
 				//これ以上積めない時はゲームオーバー
@@ -946,6 +971,7 @@ int main(int argc, char **argv){
 					usleep(1000000);
 					control.TearOffPuyo(stackedPuyo);
 				}
+
 				control.SettingNewPuyo(activePuyo, nextpuyo1, nextpuyo2, puyoNumber);
 				nextpuyo1 = control.GeneratePuyo(activePuyo);
 				nextpuyo2 = control.GeneratePuyo(activePuyo);
