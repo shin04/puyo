@@ -266,7 +266,7 @@ public:
 
 	void TearOffPuyo(PuyoArrayStack &stackedPuyo)
 	{
-		for (int y = 0; y < stackedPuyo.GetLine(); y++)
+		for (int y = stackedPuyo.GetLine(); 0 < y; y--)
 		{
 			for (int x = 0; x < stackedPuyo.GetColumn(); x++)
 			{
