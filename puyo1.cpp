@@ -281,7 +281,7 @@ public:
 					continue;
 				}
 
-				//端ではない、右隣に移動中、着地済みのぷよがない時に移動
+				//端ではない、左隣に移動中または着地済みのぷよがない時に移動
 				if (0 < x && activePuyo.GetValue(y, x - 1) == NONE && stackedPuyo.GetValue(y, x - 1) == NONE)
 				{
 					puyo_temp[y*activePuyo.GetColumn() + (x - 1)] = activePuyo.GetValue(y, x);
@@ -328,7 +328,7 @@ public:
 					continue;
 				}
 
-				//端ではない、右隣に移動中、着地済みのぷよがない時に移動
+				//端ではない、右隣に移動中または着地済みのぷよがない時に移動
 				if (x < activePuyo.GetColumn() - 1 && activePuyo.GetValue(y, x + 1) == NONE && stackedPuyo.GetValue(y, x + 1) == NONE)
 				{
 					puyo_temp[y*activePuyo.GetColumn() + (x + 1)] = activePuyo.GetValue(y, x);
@@ -544,6 +544,41 @@ public:
 		}
 	}
 
+	//ぷよのホールド
+	void HoldPuyo(PuyoArrayActive &activePuyo, PuyoControl control, puyocolor &holdpuyo1, puyocolor &holdpuyo2, int puyoNumber)
+	{
+		puyocolor nextpuyo1 = holdpuyo1;
+		puyocolor nextpuyo2 = holdpuyo2;
+
+		// ぷよを探索
+		bool findingpuyo1 = true;
+		for (int y = 0; y < activePuyo.GetLine(); y++)
+		{
+			for (int x = 0; x < activePuyo.GetColumn(); x++)
+			{
+				if (activePuyo.GetValue(y, x) != NONE)
+				{
+					if (findingpuyo1 == true)
+					{
+						holdpuyo1 = activePuyo.GetValue(y, x);
+						findingpuyo1 = false;
+						activePuyo.SetValue(y, x, NONE);
+					}
+					else if (findingpuyo1 != true)
+					{
+						holdpuyo2 = activePuyo.GetValue(y, x);
+						activePuyo.SetValue(y, x, NONE);
+					}
+				}
+			}
+		}
+
+		// 新たなぷよを作成
+		control.SettingNewPuyo(activePuyo, nextpuyo1, nextpuyo2, puyoNumber);
+		nextpuyo1 = control.GeneratePuyo(activePuyo);
+		nextpuyo2 = control.GeneratePuyo(activePuyo);
+	}
+
 	//ぷよ消滅処理を全座標で行う
 	//消滅したぷよの数を返す
 	int VanishPuyo(PuyoArrayStack &puyostack)
@@ -740,11 +775,12 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoN
 
 	char msg1[256];
 	char msg2[256];
-	char msg3[4];
+	char msg3[9];
 	sprintf(msg1, "Field: %d x %d, Puyo number: %d\n", activePuyo.GetLine(), activePuyo.GetColumn(), puyoNumber);
 	mvaddstr(2, COLS - 35, msg1);
 	sprintf(msg2, "Score : %d\n", score);
 	mvaddstr(3, COLS - 35, msg2);
+
 	sprintf(msg3, "NEXT");
 	mvaddstr(5, COLS - 35, msg3);
 	DisplayPuyo(newpuyo1, 7, COLS - 30);
@@ -756,18 +792,23 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoN
 void DisplayStartScreen()
 {
 	clear();
-	mvprintw(LINES/2-4, (COLS-72)/2, " SSSSSS    TTTTTTTTTTT    AAAAAA     RRRRRR     TTTTTTTTTT");
-	mvprintw(LINES/2-3, (COLS-72)/2, "S      S       TT        A      A    R     R        TT    ");
-	mvprintw(LINES/2-2, (COLS-72)/2, "S              TT        A      A    R      R       TT    ");
-	mvprintw(LINES/2-1, (COLS-72)/2, " SSSSSS        TT        AAAAAAAA    RRRRRRR        TT    ");
-	mvprintw(LINES/2  , (COLS-72)/2, "       S       TT        A      A    R RR           TT    ");
-	mvprintw(LINES/2+1, (COLS-72)/2, "S      S       TT        A      A    R   R          TT    ");
-	mvprintw(LINES/2+2, (COLS-72)/2, "S      S       TT        A      A    R    R         TT    ");
-	mvprintw(LINES/2+3, (COLS-72)/2, " SSSSSS        TT        A      A    R     RR       TT    ");
-	mvprintw(LINES/2+6, (COLS-72)/2, "Plese Push SpaceKey");
+	mvprintw(LINES/2-9, (COLS-72)/2, " SSSSSS    TTTTTTTTTTT    AAAAAA     RRRRRR     TTTTTTTTTT");
+	mvprintw(LINES/2-8, (COLS-72)/2, "S      S       TT        A      A    R     R        TT    ");
+	mvprintw(LINES/2-7, (COLS-72)/2, "S              TT        A      A    R      R       TT    ");
+	mvprintw(LINES/2-6, (COLS-72)/2, " SSSSSS        TT        AAAAAAAA    RRRRRRR        TT    ");
+	mvprintw(LINES/2-5, (COLS-72)/2, "       S       TT        A      A    R RR           TT    ");
+	mvprintw(LINES/2-4, (COLS-72)/2, "S      S       TT        A      A    R   R          TT    ");
+	mvprintw(LINES/2-3, (COLS-72)/2, "S      S       TT        A      A    R    R         TT    ");
+	mvprintw(LINES/2-2, (COLS-72)/2, " SSSSSS        TT        A      A    R     RR       TT    ");
+	mvprintw(LINES/2+1, COLS/2, "Usage");
+	mvprintw(LINES/2+2 , COLS/2, "Space Key : game start");
+	mvprintw(LINES/2+3, COLS/2, "Up Key    : Rotate");
+	mvprintw(LINES/2+4, COLS/2, "Right Key : Move Right");
+	mvprintw(LINES/2+5, COLS/2, "Left Key  : Move Left");
+	mvprintw(LINES/2+6, COLS/2, "Down Key  : Move Down");
 }
 
-void DisplayEndScreen()
+void DisplayEndScreen(int score)
 {
 	clear();
 	mvprintw(LINES/2-4,(COLS-70)/2," GGGG    AAA   M     M  EEEEE        OOOO   V     V  EEEEE  RRRR       ");
@@ -778,7 +819,8 @@ void DisplayEndScreen()
   mvprintw(LINES/2+1,(COLS-70)/2,"G   GGG A   A  M     M  E           O    O   V   V   E      R   R      ");
   mvprintw(LINES/2+2,(COLS-70)/2,"G    G  A   A  M     M  E           O    O    V V    E      R    R     ");
   mvprintw(LINES/2+3,(COLS-70)/2," GGGG   A   A  M     M  EEEEE        OOOO      V     EEEEE  R     R    ");
-	mvprintw(LINES/2+6, (COLS-72)/2, "Plese Push 'Q'key");
+  mvprintw(LINES/2+6, (COLS-70)/2, "your final score : %d", score);
+	mvprintw(LINES/2+8, (COLS-72)/2, "Quiet : Q");
 }
 
 //ここから実行される
@@ -874,6 +916,8 @@ int main(int argc, char **argv){
 		case KEY_UP:
 			control.Rotate(activePuyo, stackedPuyo);
 			break;
+		case 'H':
+			control.HoldPuyo(activePuyo, control, nextpuyo1, nextpuyo2, puyoNumber);
 		default:
 			break;
 		}
@@ -889,10 +933,6 @@ int main(int argc, char **argv){
 				//これ以上積めない時はゲームオーバー
 				if (stackedPuyo.GetValue(1, 5) != NONE || stackedPuyo.GetValue(1, 6) != NONE)
 				{
-					//上までぷよが積まれていたらゲーム終了
-					//endwin();
-					//std::cout << "GAME OVER" << std::endl;
-					//exit(0);
 					break;
 				}
 
@@ -930,7 +970,7 @@ int main(int argc, char **argv){
 			break;
 		}
 
-		DisplayEndScreen();
+		DisplayEndScreen(score);
 	}
 
 	//画面をリセット
