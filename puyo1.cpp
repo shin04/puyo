@@ -950,7 +950,7 @@ int main(int argc, char **argv){
 		case KEY_UP:
 			control.Rotate(activePuyo, stackedPuyo);
 			break;
-		case 'H':
+		case 'h':
 			control.HoldPuyo(activePuyo, control, nextpuyo1, nextpuyo2, puyoNumber);
 		default:
 			break;
