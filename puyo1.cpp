@@ -7,6 +7,9 @@
 #include <iostream>
 #include <unistd.h>
 #include <math.h>
+#include <fstream>
+#include <string.h>
+#include <vector>
 
 //ぷよの色を表すの列挙型
 //NONEが無し，RED,BLUE,..が色を表す
@@ -303,11 +306,12 @@ public:
 		{
 			for (int x = 0; x < activePuyo.GetColumn(); x++)
 			{
-				if (activePuyo.GetValue(y, x) == NONE) {
+				if (activePuyo.GetValue(y, x) == NONE)
+				{
 					continue;
 				}
 
-				//端ではない、左隣に移動中または着地済みのぷよがない時に移動
+				//端ではない、左隣に移動中または着地済みのぷよがない時に移動、また下のぷよが引っかからない時に移動
 				if (0 < x && activePuyo.GetValue(y, x - 1) == NONE && stackedPuyo.GetValue(y, x - 1) == NONE)
 				{
 					puyo_temp[y*activePuyo.GetColumn() + (x - 1)] = activePuyo.GetValue(y, x);
@@ -846,7 +850,7 @@ void DisplayEndScreen(int score)
   mvprintw(LINES/2+2,(COLS-70)/2,"G    G  A   A  M     M  E           O    O    V V    E      R    R     ");
   mvprintw(LINES/2+3,(COLS-70)/2," GGGG   A   A  M     M  EEEEE        OOOO      V     EEEEE  R     R    ");
   mvprintw(LINES/2+6, (COLS-70)/2, "your final score : %d", score);
-	mvprintw(LINES/2+8, (COLS-72)/2, "Quiet : Q");
+	mvprintw(LINES/2+10, (COLS-72)/2, "Quiet : Q");
 }
 
 //ここから実行される
@@ -985,14 +989,53 @@ int main(int argc, char **argv){
 
 	// ゲームオーバー画面
 	while (1) {
+		// 得点の読み込み
+		int row_num = 0;
+		int max_score = 0;
+		std::ifstream ifs("score.txt");
+    std::string point;
+		std::vector<std::string> scores;
+    if (ifs.fail())
+    {
+			max_score = 0;
+    }
+    while (getline(ifs, point))
+    {
+			row_num++;
+			scores.push_back(point);
+    }
+		ifs.close();
+
+		// 最高得点を表示
+		for (int i = 0; i < row_num; i++)
+		{
+			if (max_score < atoi(scores[i].c_str()))
+			{
+				max_score = atoi(scores[i].c_str());
+			}
+		}
+
+		mvprintw(LINES/2+8, (COLS-72)/2, "Best Score : %d", max_score);
+
 		//キー入力受付
 		int ch;
 		ch = getch();
 
-		//Qキー入力でゲーム開始
+		//Qキー入力でゲーム終了
 		if (ch == 'Q')
 		{
 			clear();
+
+			// 得点の書き込み
+			std::ofstream opf("score.txt", std::ios::app);
+			if (opf)
+			{
+				opf << score << "\n";
+			} else {
+				printf("得点の保存に失敗しました\n");
+			}
+	    opf.close();
+
 			break;
 		}
 
