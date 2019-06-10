@@ -782,7 +782,7 @@ void DisplayPuyo(puyocolor puyo, int y, int x)
 }
 
 //表示
-void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoNumber, int score, puyocolor newpuyo1, puyocolor newpuyo2)
+void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoNumber, int score, puyocolor newpuyo1, puyocolor newpuyo2, int rensa)
 {
 	//落下中ぷよ表示
 	for (int y = 0; y < activePuyo.GetLine(); y++)
@@ -805,16 +805,19 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoN
 
 	char msg1[256];
 	char msg2[256];
-	char msg3[9];
+	char msg3[256];
+	char msg4[9];
 	sprintf(msg1, "Field: %d x %d, Puyo number: %d\n", activePuyo.GetLine(), activePuyo.GetColumn(), puyoNumber);
 	mvaddstr(2, COLS - 35, msg1);
 	sprintf(msg2, "Score : %d\n", score);
 	mvaddstr(3, COLS - 35, msg2);
+	sprintf(msg3, "Combo : %d\n", rensa);
+	mvaddstr(4, COLS - 35, msg3);
 
-	sprintf(msg3, "NEXT");
-	mvaddstr(5, COLS - 35, msg3);
-	DisplayPuyo(newpuyo1, 7, COLS - 30);
-	DisplayPuyo(newpuyo2, 7, COLS - 29);
+	sprintf(msg4, "NEXT");
+	mvaddstr(6, COLS - 35, msg4);
+	DisplayPuyo(newpuyo1, 8, COLS - 30);
+	DisplayPuyo(newpuyo2, 8, COLS - 29);
 
 	refresh();
 }
@@ -901,6 +904,7 @@ int main(int argc, char **argv){
 
 	int puyostate = 0; //ぷよの回転状況
 	int score = 0; //点数
+	int rensaCount = 0; //連鎖を数える
 
 	// スタート画面
 	while (1) {
@@ -964,14 +968,13 @@ int main(int argc, char **argv){
 				{
 					break;
 				}
-
+				rensaCount = 0; //連鎖を初期化
 				//着地していたら消えるぷよを探して新しいぷよ生成
 				control.TearOffPuyo(stackedPuyo);
-				int rensaCount = 0;
 				while (int vanishedCount = control.VanishPuyo(stackedPuyo) > 0) {
 					rensaCount += 1;
 					score += calculationScore(vanishedCount, rensaCount);
-					Display(activePuyo, stackedPuyo, puyoNumber, score, nextpuyo1, nextpuyo2);
+					Display(activePuyo, stackedPuyo, puyoNumber, score, nextpuyo1, nextpuyo2, rensaCount);
 					usleep(1000000);
 					control.TearOffPuyo(stackedPuyo);
 				}
@@ -984,7 +987,7 @@ int main(int argc, char **argv){
 		delay++;
 
 		//表示
-		Display(activePuyo, stackedPuyo, puyoNumber, score, nextpuyo1, nextpuyo2);
+		Display(activePuyo, stackedPuyo, puyoNumber, score, nextpuyo1, nextpuyo2, rensaCount);
 	}
 
 	// ゲームオーバー画面
@@ -1015,7 +1018,7 @@ int main(int argc, char **argv){
 			}
 		}
 
-		mvprintw(LINES/2+8, (COLS-72)/2, "Best Score : %d", max_score);
+		mvprintw(LINES/2+9, (COLS-72)/2, "Best Score : %d", max_score);
 
 		//キー入力受付
 		int ch;
