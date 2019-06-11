@@ -310,8 +310,8 @@ public:
 				{
 					continue;
 				}
-
-				//端ではない、左隣に移動中または着地済みのぷよがない時に移動、また下のぷよが引っかからない時に移動
+				
+				//端ではない、左隣に移動中または着地済みのぷよがない時に移動
 				if (0 < x && activePuyo.GetValue(y, x - 1) == NONE && stackedPuyo.GetValue(y, x - 1) == NONE)
 				{
 					puyo_temp[y*activePuyo.GetColumn() + (x - 1)] = activePuyo.GetValue(y, x);
