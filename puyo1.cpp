@@ -266,6 +266,7 @@ public:
 
 	void TearOffPuyo(PuyoArrayStack &stackedPuyo)
 	{
+		// 下から探す
 		for (int y = stackedPuyo.GetLine(); 0 < y; y--)
 		{
 			for (int x = 0; x < stackedPuyo.GetColumn(); x++)
@@ -310,18 +311,37 @@ public:
 				{
 					continue;
 				}
-				
-				//端ではない、左隣に移動中または着地済みのぷよがない時に移動
-				if (0 < x && activePuyo.GetValue(y, x - 1) == NONE && stackedPuyo.GetValue(y, x - 1) == NONE)
+
+				// 下に移動中のぷよがあるとき
+				if (activePuyo.GetValue(y + 1, x) != NONE)
 				{
-					puyo_temp[y*activePuyo.GetColumn() + (x - 1)] = activePuyo.GetValue(y, x);
-					//コピー後に元位置のpuyoactiveのデータは消す
-					activePuyo.SetValue(y, x, NONE);
+					//端ではない、左隣に移動中または着地済みのぷよがない時に移動
+					if (0 < x && activePuyo.GetValue(y, x - 1) == NONE && stackedPuyo.GetValue(y, x - 1) == NONE && stackedPuyo.GetValue(y + 1, x - 1) == NONE)
+					{
+						puyo_temp[y*activePuyo.GetColumn() + (x - 1)] = activePuyo.GetValue(y, x);
+						//コピー後に元位置のpuyoactiveのデータは消す
+						activePuyo.SetValue(y, x, NONE);
+					}
+					else
+					{
+						puyo_temp[y*activePuyo.GetColumn() + x] = activePuyo.GetValue(y, x);
+					}
 				}
 				else
 				{
-					puyo_temp[y*activePuyo.GetColumn() + x] = activePuyo.GetValue(y, x);
+					//端ではない、左隣に移動中または着地済みのぷよがない時に移動
+					if (0 < x && activePuyo.GetValue(y, x - 1) == NONE && stackedPuyo.GetValue(y, x - 1) == NONE)
+					{
+						puyo_temp[y*activePuyo.GetColumn() + (x - 1)] = activePuyo.GetValue(y, x);
+						//コピー後に元位置のpuyoactiveのデータは消す
+						activePuyo.SetValue(y, x, NONE);
+					}
+					else
+					{
+						puyo_temp[y*activePuyo.GetColumn() + x] = activePuyo.GetValue(y, x);
+					}
 				}
+
 			}
 		}
 
@@ -358,16 +378,34 @@ public:
 					continue;
 				}
 
-				//端ではない、右隣に移動中または着地済みのぷよがない時に移動
-				if (x < activePuyo.GetColumn() - 1 && activePuyo.GetValue(y, x + 1) == NONE && stackedPuyo.GetValue(y, x + 1) == NONE)
+				// 下に移動中のぷよがある時
+				if (activePuyo.GetValue(y + 1, x) != NONE)
 				{
-					puyo_temp[y*activePuyo.GetColumn() + (x + 1)] = activePuyo.GetValue(y, x);
-					//コピー後に元位置のpuyoactiveのデータは消す
-					activePuyo.SetValue(y, x, NONE);
+					//端ではない、右隣に移動中または着地済みのぷよがない時に移動
+					if (x < activePuyo.GetColumn() - 1 && activePuyo.GetValue(y, x + 1) == NONE && stackedPuyo.GetValue(y, x + 1) == NONE && stackedPuyo.GetValue(y + 1, x + 1) == NONE)
+					{
+						puyo_temp[y*activePuyo.GetColumn() + (x + 1)] = activePuyo.GetValue(y, x);
+						//コピー後に元位置のpuyoactiveのデータは消す
+						activePuyo.SetValue(y, x, NONE);
+					}
+					else
+					{
+						puyo_temp[y*activePuyo.GetColumn() + x] = activePuyo.GetValue(y, x);
+					}
 				}
 				else
 				{
-					puyo_temp[y*activePuyo.GetColumn() + x] = activePuyo.GetValue(y, x);
+					//端ではない、右隣に移動中または着地済みのぷよがない時に移動
+					if (x < activePuyo.GetColumn() - 1 && activePuyo.GetValue(y, x + 1) == NONE && stackedPuyo.GetValue(y, x + 1) == NONE)
+					{
+						puyo_temp[y*activePuyo.GetColumn() + (x + 1)] = activePuyo.GetValue(y, x);
+						//コピー後に元位置のpuyoactiveのデータは消す
+						activePuyo.SetValue(y, x, NONE);
+					}
+					else
+					{
+						puyo_temp[y*activePuyo.GetColumn() + x] = activePuyo.GetValue(y, x);
+					}
 				}
 			}
 		}
@@ -580,7 +618,7 @@ public:
 		puyocolor nextpuyo1 = holdpuyo1;
 		puyocolor nextpuyo2 = holdpuyo2;
 
-		// ぷよを探索
+		// ぷよを探索してネクストぷよと入れ替える
 		bool findingpuyo1 = true;
 		for (int y = 0; y < activePuyo.GetLine(); y++)
 		{
@@ -750,11 +788,13 @@ public:
 	}
 };
 
+// 点数計算
 int calculationScore(int vanishedCount, int rensaCount)
 {
 	return vanishedCount*pow(2, rensaCount)*10;
 }
 
+// ぷよを表示
 void DisplayPuyo(puyocolor puyo, int y, int x)
 {
 	switch (puyo)
@@ -803,6 +843,7 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoN
 		}
 	}
 
+	// 右側にゲーム情報を表示
 	char msg1[256];
 	char msg2[256];
 	char msg3[256];
@@ -822,6 +863,7 @@ void Display(PuyoArrayActive &activePuyo, PuyoArrayStack &stackedPuyo, int puyoN
 	refresh();
 }
 
+// スタート画面
 void DisplayStartScreen()
 {
 	clear();
@@ -841,6 +883,7 @@ void DisplayStartScreen()
 	mvprintw(LINES/2+6, COLS/2, "Down Key  : Move Down");
 }
 
+// ゲームオーバー画面
 void DisplayEndScreen(int score)
 {
 	clear();
